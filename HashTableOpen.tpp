@@ -1,6 +1,13 @@
 template <typename Key, typename Val>
 HashTableOpen<Key, Val>::HashTableOpen(int i) {
     // TODO
+
+    M = i;
+    ht = new LinkedList<Record>*[M];
+    for(int j = 0; j < M; j++)
+    {
+        ht[j] = new LinkedList<Record>();
+    }
 }
 
 template <typename Key, typename Val>
@@ -22,6 +29,14 @@ HashTableOpen<Key, Val>& HashTableOpen<Key, Val>::operator=
 template <typename Key, typename Val>
 HashTableOpen<Key, Val>::~HashTableOpen() {
     // TODO
+
+    for(int i = 0; i < M; i++)
+    {
+        delete ht[i];
+    }
+
+    delete[] ht;
+
 }
 
 template <typename Key, typename Val>
@@ -100,6 +115,21 @@ void HashTableOpen<Key, Val>::copy(const HashTableOpen<Key, Val>& copyObj) {
 template <typename Key, typename Val>
 Val HashTableOpen<Key, Val>::find(const Key& k) const {
     // TODO
+
+    int slot = hash(k);
+    LinkedList<Record>* chain = ht[slot];
+
+    for(int i = 0; i < chain->getLength(); i++)
+    {
+        Record rec = chain->getElement(i);
+        if(rec.k == k)
+        {
+            return rec.v;
+        }
+    }
+
+    throw string("erorr, find: coudln't find it");
+
 }
 
 template <typename Key, typename Val>
@@ -153,14 +183,60 @@ int HashTableOpen<Key, Val>::hash(const Key& k) const {
 template <typename Key, typename Val>
 void HashTableOpen<Key, Val>::insert(const Key& k, const Val& v) {
     // TODO
+
+    int slot = hash(k);
+    LinkedList<Record>* chain = ht[slot];
+
+    if(chain == nullptr)
+    {
+        ht[slot] = new LinkedList<Record>();
+        chain = ht[slot];
+    }
+
+    for(int i = 0; i < chain->getLength(); i++)
+    {
+        if(chain->getElement(i).k == k){
+            throw string("insert, error: duplicate key!");
+        }
+    }
+
+
+   
+   if(chain->isEmpty()) chain->append(Record(k,v));
+   else chain->insert(0, Record(k, v));
+
 }
 
 template <typename Key, typename Val>
 void HashTableOpen<Key, Val>::remove(const Key& k) {
     // TODO
+    int slot = hash(k);
+    LinkedList<Record>* chain = ht[slot];
+
+    for(int i = 0; i < chain->getLength(); i++)
+    {
+        Record rec = chain->getElement(i);
+        if(rec.k == k)
+        {
+            chain->remove(i);
+            return;
+        }
+    }
+
+    throw string("Remove, error: key not found!");
+
 }
 
 template <typename Key, typename Val>
 int HashTableOpen<Key, Val>::size() const {
     // TODO
+
+    int total = 0;
+    for(int i = 0; i < M; i++)
+    {
+        total += ht[i]->getLength();
+    }
+
+    return total;
+
 }
